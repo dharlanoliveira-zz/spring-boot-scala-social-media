@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 import java.sql.ResultSet
 import javax.sql.DataSource
-import scala.jdk.CollectionConverters.ListHasAsScala
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.jdk.javaapi.CollectionConverters.asJava
 
 @Component
@@ -19,14 +19,14 @@ class UserRepository {
   @Autowired
   var dataSource: DataSource = _
 
-  def save(user: User): Long = {
+  def save(user: User): String = {
     val parameters = user.toMap
     val insertUser = new SimpleJdbcInsert(dataSource)
               .withSchemaName("MYSOCIALMEDIA")
               .withTableName("USERS")
-              .usingGeneratedKeyColumns("ID")
 
-    insertUser.executeAndReturnKey(asJava(parameters)).longValue()
+    insertUser.execute(asJava(parameters))
+    user.uid
   }
 
   def existsUserWithUsername(username: String): Boolean = {
@@ -52,7 +52,7 @@ class UserRepository {
     val sql = "SELECT * FROM MYSOCIALMEDIA.USERS"
     queryUser.query(sql, new RowMapper[User]() {
       def mapRow(rs: ResultSet, rowNum: Int): User = {
-        new User(rs.getLong("ID"),rs.getString("USERNAME"),rs.getString("MAIL"))
+        new User(rs.getString("UID").toCharArray,rs.getString("USERNAME"),rs.getString("MAIL"))
       }
     }).asScala.toList
   }

@@ -2,7 +2,7 @@ Feature: New user registration
 
   Scenario: Registering new user
     Given There isn't any user registered yet
-    When I register a user with username "dharlanoliveira" and email "dharlanoliveira@gmail.com"
+    When I register a user with username "dharlanoliveira" and email "dharlanoliveira@gmail.com" and password "teste123"
     Then this new user will be created
 
   Scenario: Registering new user without username
@@ -14,6 +14,11 @@ Feature: New user registration
     Given There isn't any user registered yet
     When I register a user without email
     Then the service will warn that email cannot be empty
+
+  Scenario: Registering new user without password
+    Given There isn't any user registered yet
+    When I register a user without password
+    Then the service will warn that password cannot be empty
 
   Scenario: Registering user with a existent username
     Given There is a user with username "dharlanoliveira"

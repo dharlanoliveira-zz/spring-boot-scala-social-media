@@ -10,4 +10,7 @@ class UserRegistrationDTO {
   @JsonProperty
   var email: String = _
 
+  @JsonProperty
+  var password: String = _
+
 }

@@ -13,7 +13,7 @@ class UserApplicationService {
   var userRepository: UserRepository = _
 
   def newUserRegistration(userDTO: UserRegistrationDTO): UserIdDTO = {
-    val user = new User(userDTO.username, userDTO.email)
+    val user = new User(userDTO.username, userDTO.email, userDTO.password)
 
     if(userRepository.existsUserWithUsername(user.username)) {
       throw new BusinessViolation(s"Already exists a user with name ${userDTO.username}")

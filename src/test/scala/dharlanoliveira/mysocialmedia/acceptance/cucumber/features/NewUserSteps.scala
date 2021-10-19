@@ -27,23 +27,24 @@ class NewUserSteps {
 
   @Given("There is a user with username {string}")
   def thereIsUserWithUsername(username: String): Unit = {
-    val user = new User(username, "xxx@domain.com")
+    val user = new User(username, "xxx@domain.com","password")
 
     userRepository.save(user)
   }
 
   @Given("There is a user with email {string}")
   def thereIsUserWithEmail(email: String): Unit = {
-    val user = new User("login",email)
+    val user = new User("login",email,"password")
 
     userRepository.save(user)
   }
 
-  @When("I register a user with username {string} and email {string}")
-  def userWithUsernameAndMail(username: String, email: String): Unit = {
+  @When("I register a user with username {string} and email {string} and password {string}")
+  def userWithUsernameAndMail(username: String, email: String, password: String): Unit = {
     dto = new UserRegistrationDTO()
     dto.username = username
     dto.email = email
+    dto.password = password
 
     this.response = restTemplate.postForObject("/users/registration", dto, classOf[String])
   }
@@ -53,6 +54,7 @@ class NewUserSteps {
     dto = new UserRegistrationDTO()
     dto.username = username
     dto.email = "anymail@google.com"
+    dto.password = "password"
 
     this.response =  restTemplate.postForObject("/users/registration", dto, classOf[String])
   }
@@ -62,6 +64,7 @@ class NewUserSteps {
     dto = new UserRegistrationDTO()
     dto.username = "ykz"
     dto.email = email
+    dto.password = "password"
 
     this.response =  restTemplate.postForObject("/users/registration", dto, classOf[String])
   }
@@ -71,6 +74,7 @@ class NewUserSteps {
     dto = new UserRegistrationDTO()
     dto.username = null
     dto.email = "yzk@domain.com"
+    dto.password = "password"
 
     this.response =  restTemplate.postForObject("/users/registration", dto, classOf[String])
   }
@@ -80,6 +84,17 @@ class NewUserSteps {
     dto = new UserRegistrationDTO()
     dto.username = "out"
     dto.email = null
+    dto.password = "password"
+
+    this.response =  restTemplate.postForObject("/users/registration", dto, classOf[String])
+  }
+
+  @When("I register a user without password")
+  def userWithoutPassword(): Unit = {
+    dto = new UserRegistrationDTO()
+    dto.username = "dhtcu"
+    dto.email = "yzk@domain.com"
+    dto.password = null
 
     this.response =  restTemplate.postForObject("/users/registration", dto, classOf[String])
   }
@@ -87,7 +102,7 @@ class NewUserSteps {
   @Then("this new user will be created")
   def newUserCreated(): Unit = {
     val user = userRepository.getAll.head
-    assertThat(user.id).isGreaterThan(0L)
+    assertThat(user.uid).isNotNull
     assertThat(user.username).isEqualTo(dto.username)
     assertThat(user.email).isEqualTo(dto.email)
   }
@@ -103,6 +118,13 @@ class NewUserSteps {
   def emailCannotBeNull(): Unit = {
     val users = userRepository.getAll
     assertThat(this.response).startsWith("Email cannot be ")
+    assertThat(users.size).isEqualTo(0L)
+  }
+
+  @Then("the service will warn that password cannot be empty")
+  def passwordCannotBeNull(): Unit = {
+    val users = userRepository.getAll
+    assertThat(this.response).startsWith("Password cannot be ")
     assertThat(users.size).isEqualTo(0L)
   }
 
