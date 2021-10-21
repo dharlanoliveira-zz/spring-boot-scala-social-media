@@ -18,8 +18,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.5.5'
 
-	implementation 'org.scalikejdbc:scalikejdbc_2.13:3.5.0'
 	implementation "org.flywaydb:flyway-core:8.0.1"
+	implementation 'org.imgscalr:imgscalr-lib:4.2'
+	implementation 'commons-io:commons-io:2.11.0'
+
 
 	providedRuntime "com.h2database:h2:1.4.200"
 	providedRuntime 'org.springframework.boot:spring-boot-devtools:2.5.5'

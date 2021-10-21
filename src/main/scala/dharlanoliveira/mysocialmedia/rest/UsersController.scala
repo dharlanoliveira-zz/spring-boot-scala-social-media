@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, ResponseStatus, RestController}
 
 @RestController
-class UserController {
+class UsersController {
 
   @Autowired
   var applicationService: UserApplicationService = _

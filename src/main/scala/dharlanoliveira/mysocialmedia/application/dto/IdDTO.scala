@@ -2,9 +2,9 @@ package dharlanoliveira.mysocialmedia.application.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class UserIdDTO(id: String) {
+class IdDTO(idResult: Long) {
 
-  @JsonProperty var uid: String = _
+  @JsonProperty var id: Long = _
 
-  this.uid = id
+  this.id = idResult
 }

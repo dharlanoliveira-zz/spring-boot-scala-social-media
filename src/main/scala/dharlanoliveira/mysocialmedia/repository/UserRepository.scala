@@ -14,8 +14,6 @@ import scala.jdk.javaapi.CollectionConverters.asJava
 @Component
 class UserRepository {
 
-
-
   @Autowired
   var dataSource: DataSource = _
 
@@ -34,6 +32,15 @@ class UserRepository {
 
     val sql = "SELECT COUNT(*) FROM MYSOCIALMEDIA.USERS WHERE USERNAME=?"
     val count = queryUser.queryForObject(sql,classOf[Integer], username)
+
+    count > 0
+  }
+
+  def existsUserWithId(uid: String): Boolean = {
+    val queryUser = new JdbcTemplate(dataSource)
+
+    val sql = "SELECT COUNT(*) FROM MYSOCIALMEDIA.USERS WHERE UID=?"
+    val count = queryUser.queryForObject(sql,classOf[Integer], uid)
 
     count > 0
   }

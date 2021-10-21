@@ -21,6 +21,7 @@ class ExceptionController {
 
   @ExceptionHandler(value = Array(classOf[RuntimeException]))
   def handleRuntimeException(ex: RuntimeException, request: WebRequest): ResponseEntity[String] = {
+    ex.printStackTrace()
     new ResponseEntity[String](ex.getMessage, HttpStatus.INTERNAL_SERVER_ERROR)
   }
 
