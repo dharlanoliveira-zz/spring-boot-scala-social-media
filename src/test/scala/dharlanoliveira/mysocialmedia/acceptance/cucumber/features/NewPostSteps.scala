@@ -1,19 +1,17 @@
 package dharlanoliveira.mysocialmedia.acceptance.cucumber.features
 
-import dharlanoliveira.mysocialmedia.application.domain.User
 import dharlanoliveira.mysocialmedia.application.dto.NewPostDTO
-import dharlanoliveira.mysocialmedia.repository.{PostRepository, UserRepository}
-import io.cucumber.java.en.{Given, Then, When}
+import dharlanoliveira.mysocialmedia.repository.PostRepository
+import io.cucumber.java.en.{Then, When}
 import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.core.io.ClassPathResource
 
-import java.nio.charset.StandardCharsets
 import java.util.Base64
 
-class NewPostSteps {
+class NewPostSteps(userSteps: UserSteps) {
 
   @Autowired
   var restTemplate: TestRestTemplate = _
@@ -21,22 +19,13 @@ class NewPostSteps {
   @Autowired
   var postRepository: PostRepository = _
 
-  @Autowired
-  var userRepository: UserRepository = _
-
   var response : String = _
 
   var imageSize: Int = _
 
-  var userUid: String = _
+  var postId: Long = _
 
   var post: NewPostDTO = _
-
-  @Given("exists a user with username {string}")
-  def existsUserWithUsername(username: String) : Unit = {
-    val user = new User(username,username.concat("@gmail.com"),"password")
-    userUid = userRepository.save(user)
-  }
 
   @When("I try to register a post without inform user")
   def newPostWithoutUser(): Unit = {
@@ -61,7 +50,7 @@ class NewPostSteps {
   @When("This user try to register a post without inform text")
   def newPostWithoutText(): Unit = {
     val dto = new NewPostDTO()
-    dto.userUid = userUid
+    dto.userUid = userSteps.users.head._2
     dto.imageBase64=base64Image("lapis.png")
     dto.text=null
 
@@ -71,7 +60,7 @@ class NewPostSteps {
   @When("This user try to register a post without inform a image")
   def newPostWithoutImage(): Unit = {
     val dto = new NewPostDTO()
-    dto.userUid = userUid
+    dto.userUid = userSteps.users.head._2
     dto.imageBase64=null
     dto.text="Any text"
 
@@ -84,7 +73,7 @@ class NewPostSteps {
   @When("This user try to register a post with text {string} and a image")
   def postWithText(postText: String): Unit = {
     val dto = new NewPostDTO()
-    dto.userUid = userUid
+    dto.userUid = userSteps.users.head._2
     dto.imageBase64=base64Image("lapis.png")
     dto.text=postText
 
@@ -124,7 +113,7 @@ class NewPostSteps {
     val firstPost = posts.head
     assertThat(firstPost.instant).isNotNull
     assertThat(firstPost.text).isEqualTo(this.post.text)
-    assertThat(firstPost.userUid).isEqualTo(this.userUid)
+    assertThat(firstPost.ownerUid).isEqualTo(userSteps.users.head._2)
     assertThat(firstPost.image).isNull()
   }
 
@@ -135,7 +124,7 @@ class NewPostSteps {
     val firstPost = posts.head
     assertThat(firstPost.instant).isNotNull
     assertThat(firstPost.text).isEqualTo(this.post.text)
-    assertThat(firstPost.userUid).isEqualTo(this.userUid)
+    assertThat(firstPost.ownerUid).isEqualTo(userSteps.users.head._2)
     assertThat(firstPost.image.readAllBytes().length).isLessThan(this.imageSize)
   }
 
@@ -144,9 +133,9 @@ class NewPostSteps {
     Base64.getEncoder.encodeToString(IOUtils.toByteArray(inputStream))
   }
 
+
   def fileSize(path: String): Int = {
     val inputStream = new ClassPathResource(path, this.getClass.getClassLoader).getInputStream
     IOUtils.length(inputStream.readAllBytes())
   }
-
 }

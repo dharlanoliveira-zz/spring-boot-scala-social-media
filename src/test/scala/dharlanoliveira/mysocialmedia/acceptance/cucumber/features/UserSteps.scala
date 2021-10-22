@@ -8,7 +8,7 @@ import dharlanoliveira.mysocialmedia.application.dto.UserRegistrationDTO
 import dharlanoliveira.mysocialmedia.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 
-class NewUserSteps {
+class UserSteps {
 
   @Autowired
   var restTemplate: TestRestTemplate = _
@@ -19,6 +19,15 @@ class NewUserSteps {
   var dto: UserRegistrationDTO = _
 
   var response : String = _
+
+  var users: Map[String,String] = Map[String,String]()
+
+  @Given("exists a user with username {string}")
+  def existsUserWithUsername(username: String) : Unit = {
+    val user = new User(username,username.concat("@gmail.com"),"password")
+    val uid = userRepository.save(user)
+    users += username -> uid
+  }
 
   @Given("There isn't any user registered yet")
   def thereIsntAnyUser(): Unit = {

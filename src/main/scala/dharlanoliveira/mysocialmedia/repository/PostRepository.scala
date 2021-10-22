@@ -1,6 +1,6 @@
 package dharlanoliveira.mysocialmedia.repository
 
-import dharlanoliveira.mysocialmedia.application.domain.Post
+import dharlanoliveira.mysocialmedia.application.domain.{Comment, Post}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterJdbcTemplate}
 import org.springframework.jdbc.core.support.SqlLobValue
@@ -17,25 +17,43 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 @Component
 class PostRepository {
 
-
   @Autowired
   var dataSource: DataSource = _
 
   def save(post: Post): Long = {
+    if(post.id == 0) insertPost(post) else updatePost(post)
+  }
+
+  def getImageByPostId(id: Long): InputStream = {
+    val queryUser = new JdbcTemplate(dataSource)
+    val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS WHERE ID=?"
+    val images = queryUser.query(sql, new RowMapper[InputStream]() {
+      def mapRow(rs: ResultSet, rowNum: Int): InputStream = {
+        rs.getBlob("IMAGE").getBinaryStream
+      }
+    }, id).asScala.toList
+    if(images.isEmpty) null else images.head
+  }
+
+  def getPostById(postId: Long): Post = {
+    val queryUser = new JdbcTemplate(dataSource)
+    val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS WHERE ID=?"
+    val posts = queryUser.query(sql, postRowMapper, postId).asScala.toList
+    if(posts.isEmpty) null else posts.head
+  }
+
+  def getAll: List[Post] = {
+    val queryUser = new JdbcTemplate(dataSource)
+    val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS"
+    queryUser.query(sql, postRowMapper).asScala.toList
+  }
+
+  private def insertPost(post: Post): Long = {
     val insertPost = new NamedParameterJdbcTemplate(dataSource)
 
     val holder = new GeneratedKeyHolder
 
-    val parameters = new MapSqlParameterSource
-    parameters.addValue("owner_uid", post.userUid)
-    parameters.addValue("text", post.text)
-    parameters.addValue("instant", post.instant, Types.TIMESTAMP)
-
-    if(post.image != null) {
-      parameters.addValue("image", new SqlLobValue(post.image, post.image.available(), new DefaultLobHandler), Types.BLOB)
-    } else {
-      parameters.addValue("image", null, Types.BLOB)
-    }
+    val parameters = updateAndInsertPostParameters(post)
 
     insertPost.update("INSERT INTO MYSOCIALMEDIA.POSTS(OWNER_UID,TEXT,INSTANT,IMAGE) VALUES(:owner_uid,:text,:instant,:image)", parameters, holder)
 
@@ -43,28 +61,71 @@ class PostRepository {
     post.id
   }
 
-  def getImageByPostId(id: Long): InputStream = {
-    val queryUser = new JdbcTemplate(dataSource)
-    val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS WHERE ID=?"
-    queryUser.queryForObject(sql, new RowMapper[InputStream]() {
-      def mapRow(rs: ResultSet, rowNum: Int): InputStream = {
-        rs.getBlob("IMAGE").getBinaryStream
-      }
-    }, id)
+  private def updatePost(post: Post): Long = {
+    val updatePost = new NamedParameterJdbcTemplate(dataSource)
+
+    val parameters = updateAndInsertPostParameters(post)
+    parameters.addValue("id", post.id)
+
+    updatePost.update("UPDATE MYSOCIALMEDIA.POSTS SET OWNER_UID=:owner_uid,TEXT=:text,INSTANT=:instant,IMAGE=:image WHERE :id", parameters)
+
+    post.comments.foreach(comment => {
+      if (comment.id == 0) insertComment(comment) else updateComment(comment)
+    })
+
+    post.id
   }
 
-  def getAll: List[Post] = {
-    val queryUser = new JdbcTemplate(dataSource)
-    val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS"
-    queryUser.query(sql, new RowMapper[Post]() {
+  private def insertComment(comment: Comment): Unit = {
+    val insertComment = new NamedParameterJdbcTemplate(dataSource)
+    val parameters = updateAndInsertCommentParameters(comment)
+
+    insertComment.update("INSERT INTO MYSOCIALMEDIA.COMMENT(OWNER_UID,TEXT,INSTANT) VALUES(:owner_uid,:text,:instant)", parameters)
+  }
+
+  private def updateComment(comment: Comment): Unit = {
+    val updateComment = new NamedParameterJdbcTemplate(dataSource)
+    val parameters = updateAndInsertCommentParameters(comment)
+    parameters.addValue("id", comment.id)
+
+    updateComment.update("UPDATE MYSOCIALMEDIA.COMMENT OWNER_UID=:owner_uid,TEXT=:text,INSTANT:instant WHERE ID=:id", parameters)
+  }
+
+  private def updateAndInsertPostParameters(post: Post): MapSqlParameterSource = {
+    val parameters = new MapSqlParameterSource()
+
+    parameters.addValue("owner_uid", post.ownerUid)
+    parameters.addValue("text", post.text)
+    parameters.addValue("instant", post.instant, Types.TIMESTAMP)
+
+    if (post.image != null) {
+      parameters.addValue("image", new SqlLobValue(post.image, post.image.available(), new DefaultLobHandler), Types.BLOB)
+    } else {
+      parameters.addValue("image", null, Types.BLOB)
+    }
+
+    parameters
+  }
+
+  private def updateAndInsertCommentParameters(comment: Comment): MapSqlParameterSource = {
+    val parameters = new MapSqlParameterSource
+    parameters.addValue("owner_uid", comment.ownerUid)
+    parameters.addValue("text", comment.text)
+    parameters.addValue("instant", comment.instant, Types.TIMESTAMP)
+    parameters
+  }
+
+
+  private def postRowMapper: RowMapper[Post] = {
+    new RowMapper[Post]() {
       def mapRow(rs: ResultSet, rowNum: Int): Post = {
         new Post(rs.getLong("ID"),
           rs.getString("OWNER_UID"),
           rs.getString("TEXT"),
           rs.getBinaryStream("IMAGE"),
-          rs.getTimestamp("instant").toLocalDateTime
+          rs.getTimestamp("INSTANT").toLocalDateTime
         )
       }
-    }).asScala.toList
+    }
   }
 }

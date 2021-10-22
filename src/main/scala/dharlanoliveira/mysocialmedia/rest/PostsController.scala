@@ -1,11 +1,12 @@
 package dharlanoliveira.mysocialmedia.rest
 
 import dharlanoliveira.mysocialmedia.application.{PostApplicationService, UserApplicationService}
-import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewPostDTO, UserIdDTO, UserRegistrationDTO}
+import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewCommentDTO, NewPostDTO, UpdatePostDTO, UserIdDTO, UserRegistrationDTO}
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.{GetMapping, PathVariable, PostMapping, RequestBody, ResponseStatus, RestController}
+import org.springframework.web.bind.annotation.{GetMapping, PatchMapping, PathVariable, PostMapping, RequestBody, ResponseStatus, RestController}
+import org.valid4j.Assertive.ensure
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URLConnection
@@ -29,8 +30,17 @@ class PostsController {
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping(path = Array("/posts"))
   def newPost(@RequestBody post: NewPostDTO): IdDTO = {
+    ensure(post != null)
     val stream = extractImageContent(post.imageBase64)
     applicationService.newPost(post.userUid,post.text,stream)
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @PatchMapping(path = Array("/posts"))
+  def updatePost(@RequestBody post: UpdatePostDTO): Unit = {
+    ensure(post != null)
+    val stream = extractImageContent(post.imageBase64)
+    applicationService.updatePost(post, stream)
   }
 
   /**
@@ -49,14 +59,15 @@ class PostsController {
     }
   }
 
-//  /**
-//   * Return image associated with a post
-//   */
-//  @ResponseStatus(HttpStatus.OK)
-//  @GetMapping(path = Array("/posts/{id}/comment"))
-//  def postComment(@PathVariable id: Long,@RequestBody NewCommentDTO): Unit = {
-//
-//  }
+  /**
+   * Return image associated with a post
+   */
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping(path = Array("/posts/{id}/comment"))
+  def postComment(@RequestBody comment: NewCommentDTO): Unit = {
+    ensure(comment != null)
+    applicationService.newComment(comment)
+  }
 
   def extractImageContent(image: String): ByteArrayInputStream = {
     if (image != null) {

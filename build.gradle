@@ -18,6 +18,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc:2.5.5'
 
+	implementation 'org.valid4j:valid4j:0.5.0'
+
 	implementation "org.flywaydb:flyway-core:8.0.1"
 	implementation 'org.imgscalr:imgscalr-lib:4.2'
 	implementation 'commons-io:commons-io:2.11.0'
@@ -27,6 +29,7 @@ dependencies {
 	providedRuntime 'org.springframework.boot:spring-boot-devtools:2.5.5'
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat:2.5.5'
 
+	testImplementation 'org.apache.httpcomponents:httpclient:4.5.13'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
 	testImplementation 'org.junit.vintage:junit-vintage-engine:5.8.1'
 	testImplementation("io.cucumber:cucumber-java:7.0.0",
