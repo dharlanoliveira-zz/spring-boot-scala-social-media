@@ -38,3 +38,13 @@ Feature: Creating and Updating Comments
     And there is a comment "first comment" on this post from the user "andrefernandez"
     When the user "andrefernandez" change the text of this comment to "changed comment"
     Then this comment will have the text "changed comment"
+
+
+  Scenario: Editing comment from other user
+
+    Given exists a user with username "dharlanoliveira"
+    And exists a user with username "andrefernandez"
+    And there is a post with text "My post" from the user "dharlanoliveira"
+    And there is a comment "first comment" on this post from the user "andrefernandez"
+    When the user "dharlanoliveira" change the text of this comment to "changed comment"
+    Then the system will inform that only the owner can edit the comment

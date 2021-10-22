@@ -107,6 +107,9 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
     assertThat(comment.text).isEqualTo(text)
   }
 
-
+  @Then("the system will inform that only the owner can edit the comment")
+  def onlyOwnerCanEditComments(): Unit = {
+    assertThat(this.response).isEqualTo("Only same user can edit the comment")
+  }
 
 }
