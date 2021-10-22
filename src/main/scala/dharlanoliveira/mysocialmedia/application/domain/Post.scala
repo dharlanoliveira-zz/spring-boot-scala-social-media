@@ -70,6 +70,15 @@ class Post() {
     this.comments = this.comments :+ new Comment(text, userUid)
   }
 
+  def updateComment(comment: Long, userUid: String, text: String): Unit = {
+    val findedComment = this.comments.find( c => c.id == comment).orNull
+    if(findedComment == null) throw new BusinessViolation(s"Comment with id ${comment} doesn't exists")
+    if(findedComment.ownerUid != userUid) throw new BusinessViolation(s"Only same user can edit the comment")
+
+    findedComment.updateText(text)
+  }
+
+
   def toMap: Map[String, _] = {
     Map(
       "owner_uid" -> this.ownerUid,

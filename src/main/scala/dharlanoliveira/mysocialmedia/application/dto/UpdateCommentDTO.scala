@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 class UpdateCommentDTO extends CommentDTO {
 
   @JsonProperty
-  var id: String = _
+  var id: Long = _
 
 }

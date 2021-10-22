@@ -35,6 +35,13 @@ class Comment() {
     checkInvariants()
   }
 
+  def updateText(text: String) : Unit = {
+    this.text = text
+    this.instant = LocalDateTime.now()
+
+    checkInvariants()
+  }
+
   def checkInvariants(): Unit = {
     if (this.ownerUid == null) {
       throw new BusinessViolation("User cannot be null")

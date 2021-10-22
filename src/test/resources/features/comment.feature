@@ -20,3 +20,21 @@ Feature: Creating and Updating Comments
     And there is a post with text "My post" from the user "dharlanoliveira"
     When the user "andrefernandez" add a comment with text "first comment" to this post
     Then comment will be added with text "first comment"
+
+  Scenario: Adding second comment to a post
+
+    Given exists a user with username "dharlanoliveira"
+    And exists a user with username "andrefernandez"
+    And there is a post with text "My post" from the user "dharlanoliveira"
+    When the user "andrefernandez" add a comment with text "first comment" to this post
+    When the user "andrefernandez" add a comment with text "second comment" to this post
+    Then this post will have two comments
+
+  Scenario: Editing comment
+
+    Given exists a user with username "dharlanoliveira"
+    And exists a user with username "andrefernandez"
+    And there is a post with text "My post" from the user "dharlanoliveira"
+    And there is a comment "first comment" on this post from the user "andrefernandez"
+    When the user "andrefernandez" change the text of this comment to "changed comment"
+    Then this comment will have the text "changed comment"

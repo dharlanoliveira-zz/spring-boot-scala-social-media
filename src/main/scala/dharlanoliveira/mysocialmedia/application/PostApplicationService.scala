@@ -1,7 +1,7 @@
 package dharlanoliveira.mysocialmedia.application
 
 import dharlanoliveira.mysocialmedia.application.domain.Post
-import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewCommentDTO, UpdatePostDTO}
+import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewCommentDTO, UpdateCommentDTO, UpdatePostDTO}
 import dharlanoliveira.mysocialmedia.application.util.ImageScalr
 import dharlanoliveira.mysocialmedia.repository.{PostRepository, UserRepository}
 import org.springframework.beans.BeanUtils
@@ -13,6 +13,8 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 @Component
 class PostApplicationService {
+
+
 
   @Autowired
   var postRepository: PostRepository = _
@@ -51,6 +53,17 @@ class PostApplicationService {
     if(post == null) throw new BusinessViolation(s"Post with id ${comment.postId} is invalid")
 
     post.addComment(comment.text,comment.userUid)
+
+    postRepository.save(post)
+  }
+
+  def updateComment(updateComment: UpdateCommentDTO): Unit = {
+    val userUid = updateComment.userUid
+    if (userUid != null && !userRepository.existsUserWithId(userUid)) throw new BusinessViolation(s"User with id ${userUid} is invalid")
+
+    val post = postRepository.getPostById(updateComment.postId)
+
+    post.updateComment(updateComment.id, updateComment.userUid, updateComment.text)
 
     postRepository.save(post)
   }

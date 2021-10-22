@@ -1,7 +1,7 @@
 package dharlanoliveira.mysocialmedia.rest
 
 import dharlanoliveira.mysocialmedia.application.{PostApplicationService, UserApplicationService}
-import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewCommentDTO, NewPostDTO, UpdatePostDTO, UserIdDTO, UserRegistrationDTO}
+import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewCommentDTO, NewPostDTO, UpdateCommentDTO, UpdatePostDTO, UserIdDTO, UserRegistrationDTO}
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -60,15 +60,21 @@ class PostsController {
     }
   }
 
-  /**
-   * Return image associated with a post
-   */
   @ResponseStatus(HttpStatus.OK)
   @PostMapping(path = Array("/posts/{postId}/comments"))
   def postComment(@PathVariable postId: Long, @RequestBody comment: NewCommentDTO): Unit = {
     ensure(comment != null)
     ensure(comment.postId == postId)
     applicationService.newComment(comment)
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @PostMapping(path = Array("/posts/{postId}/comments/{commentId}"))
+  def update(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody comment: UpdateCommentDTO): Unit = {
+    ensure(comment != null)
+    ensure(comment.postId == postId)
+    ensure(comment.id == commentId)
+    applicationService.updateComment(comment)
   }
 
   def extractImageContent(image: String): ByteArrayInputStream = {

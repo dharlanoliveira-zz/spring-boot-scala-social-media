@@ -17,6 +17,8 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 @Component
 class PostRepository {
 
+
+
   @Autowired
   var dataSource: DataSource = _
 
@@ -46,6 +48,20 @@ class PostRepository {
     val queryUser = new JdbcTemplate(dataSource)
     val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS"
     queryUser.query(sql, postRowMapper).asScala.toList
+  }
+
+
+  def getCommentsByPost(postId: Long): List[Comment] = {
+    val query = new JdbcTemplate(dataSource)
+    val sql = "SELECT * FROM MYSOCIALMEDIA.COMMENTS WHERE POST_ID=?"
+    query.query(sql, commentRowMapper, postId).asScala.toList
+  }
+
+  def getCommentById(id: Long) : Comment = {
+    val query = new JdbcTemplate(dataSource)
+    val sql = "SELECT * FROM MYSOCIALMEDIA.COMMENTS WHERE ID=?"
+    val comments = query.query(sql, commentRowMapper, id).asScala.toList
+    if (comments.isEmpty) null else comments.head
   }
 
   private def insertPost(post: Post): Long = {
@@ -88,7 +104,7 @@ class PostRepository {
     val parameters = updateAndInsertCommentParameters(comment)
     parameters.addValue("id", comment.id)
 
-    updateComment.update("UPDATE MYSOCIALMEDIA.COMMENTS TEXT=:text,INSTANT:instant WHERE ID=:id", parameters)
+    updateComment.update("UPDATE MYSOCIALMEDIA.COMMENTS SET TEXT=:text,INSTANT=:instant WHERE ID=:id", parameters)
   }
 
   private def updateAndInsertPostParameters(post: Post): MapSqlParameterSource = {
@@ -117,12 +133,6 @@ class PostRepository {
     parameters.addValue("text", comment.text)
     parameters.addValue("instant", comment.instant, Types.TIMESTAMP)
     parameters
-  }
-
-  def getCommentsByPost(postId: Long): List[Comment] = {
-    val query = new JdbcTemplate(dataSource)
-    val sql = "SELECT * FROM MYSOCIALMEDIA.COMMENTS WHERE POST_ID=?"
-    query.query(sql, commentRowMapper, postId).asScala.toList
   }
 
   private def postRowMapper: RowMapper[Post] = {
