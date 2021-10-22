@@ -8,8 +8,6 @@ import java.time.LocalDateTime
 
 class Post() {
 
-
-
   var id: Long = _
   var ownerUid: String = _
   var text: String = _
@@ -37,13 +35,14 @@ class Post() {
     checkInvariants()
   }
 
-  def this(id: Long, userUid: String, text: String, image: InputStream, instant: LocalDateTime) = {
+  def this(id: Long, userUid: String, text: String, image: InputStream, instant: LocalDateTime, comments: List[Comment]) = {
     this(userUid, text, image)
     if (id <= 0) {
       throw new BusinessViolation("Post ID invalid")
     }
     this.id = id
     this.instant = instant
+    this.comments = comments
   }
 
   def checkInvariants(): Unit = {
@@ -68,7 +67,7 @@ class Post() {
   }
 
   def addComment(text: String, userUid: String): Unit = {
-    comments.appended(new Comment(text, userUid))
+    this.comments = this.comments :+ new Comment(text, userUid)
   }
 
   def toMap: Map[String, _] = {

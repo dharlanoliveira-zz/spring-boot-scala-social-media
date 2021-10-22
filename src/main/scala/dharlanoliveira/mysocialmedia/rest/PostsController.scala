@@ -10,7 +10,7 @@ import org.valid4j.Assertive.ensure
 
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URLConnection
-import java.util.Base64
+import java.util.{Base64, Optional}
 import javax.servlet.http.HttpServletResponse
 
 @RestController
@@ -36,9 +36,10 @@ class PostsController {
   }
 
   @ResponseStatus(HttpStatus.OK)
-  @PatchMapping(path = Array("/posts"))
-  def updatePost(@RequestBody post: UpdatePostDTO): Unit = {
+  @PatchMapping(path = Array("/posts/{id}"))
+  def updatePost(@PathVariable id: Long, @RequestBody post: UpdatePostDTO): Unit = {
     ensure(post != null)
+    ensure(post.id == id, "URL and body post ID are differents")
     val stream = extractImageContent(post.imageBase64)
     applicationService.updatePost(post, stream)
   }
@@ -63,9 +64,10 @@ class PostsController {
    * Return image associated with a post
    */
   @ResponseStatus(HttpStatus.OK)
-  @PostMapping(path = Array("/posts/{id}/comment"))
-  def postComment(@RequestBody comment: NewCommentDTO): Unit = {
+  @PostMapping(path = Array("/posts/{postId}/comments"))
+  def postComment(@PathVariable postId: Long, @RequestBody comment: NewCommentDTO): Unit = {
     ensure(comment != null)
+    ensure(comment.postId == postId)
     applicationService.newComment(comment)
   }
 

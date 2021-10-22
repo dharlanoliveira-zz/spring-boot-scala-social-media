@@ -43,11 +43,12 @@ class PostApplicationService {
   }
 
   def newComment(comment: NewCommentDTO): Unit = {
+    val userUid = comment.userUid
+    if (userUid != null && !userRepository.existsUserWithId(userUid)) throw new BusinessViolation(s"User with id ${userUid} is invalid")
+
     val post = postRepository.getPostById(comment.postId)
-    val existsUser = userRepository.existsUserWithId(comment.userUid)
 
     if(post == null) throw new BusinessViolation(s"Post with id ${comment.postId} is invalid")
-    if(!existsUser) throw new BusinessViolation(s"User with id ${comment.userUid} is invalid")
 
     post.addComment(comment.text,comment.userUid)
 
