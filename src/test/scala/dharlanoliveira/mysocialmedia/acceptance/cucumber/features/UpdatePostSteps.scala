@@ -1,12 +1,14 @@
 package dharlanoliveira.mysocialmedia.acceptance.cucumber.features
 
 import dharlanoliveira.mysocialmedia.application.domain.{Post, User}
-import dharlanoliveira.mysocialmedia.application.dto.UpdatePostDTO
+import dharlanoliveira.mysocialmedia.application.dto.{DeletePostDTO, UpdatePostDTO}
 import dharlanoliveira.mysocialmedia.repository.PostRepository
 import io.cucumber.java.en.{Given, Then, When}
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.http.{HttpEntity, HttpMethod}
 
 class UpdatePostSteps(userSteps: UserSteps, postSteps: PostSteps) {
 
@@ -48,6 +50,17 @@ class UpdatePostSteps(userSteps: UserSteps, postSteps: PostSteps) {
   }
 
 
+  @When("the user {string} delete this post")
+  def deletePost(username: String): Unit = {
+    val dto = new DeletePostDTO()
+    dto.id = postSteps.referencePost.id
+    dto.userUid = userSteps.users(username)
+
+    val request = new HttpEntity[DeletePostDTO](dto)
+    val responseEntity = restTemplate.exchange(s"/posts/${dto.id}", HttpMethod.DELETE, request, classOf[String])
+    this.response = responseEntity.getBody
+  }
+
   @Then("the system will inform that is required a valid post")
   def postIsInvalid(): Unit = {
     assertThat(this.response).startsWith("Post with id")
@@ -67,6 +80,12 @@ class UpdatePostSteps(userSteps: UserSteps, postSteps: PostSteps) {
   def systemWillInformOnlyUserCanEdit(): Unit = {
     assertThat(this.response).startsWith("Post with id")
     assertThat(this.response).endsWith("doesnt't exists")
+  }
+
+  @Then("the post will be deleted")
+  def postDeleted(): Unit = {
+    val post = postRepository.getPostById(this.postSteps.referencePost.id)
+    assertNull(post)
   }
 
 

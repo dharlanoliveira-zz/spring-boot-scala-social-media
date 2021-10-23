@@ -39,3 +39,9 @@ Feature: Creating and Updating Posts
     And there is a post of the user "dharlanoliveira"
     When the user "andrefernandez" try to update this post
     Then the system will inform that just the owner of the post can update the content
+
+  Scenario: Deleting post
+    Given exists a user with username "dharlanoliveira"
+    And there is a post with text "My first post" from this user
+    When the user "dharlanoliveira" delete this post
+    Then the post will be deleted

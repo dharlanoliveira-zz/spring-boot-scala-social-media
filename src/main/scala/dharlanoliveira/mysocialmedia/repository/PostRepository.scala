@@ -17,19 +17,20 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 @Component
 class PostRepository {
 
-
-
   @Autowired
   var dataSource: DataSource = _
+
+  @Autowired
+  var userRepository: UserRepository = _
 
   def save(post: Post): Long = {
     if (post.id == 0) insertPost(post) else updatePost(post)
   }
 
   def getImageByPostId(id: Long): InputStream = {
-    val queryUser = new JdbcTemplate(dataSource)
+    val queryPost = new JdbcTemplate(dataSource)
     val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS WHERE ID=?"
-    val images = queryUser.query(sql, new RowMapper[InputStream]() {
+    val images = queryPost.query(sql, new RowMapper[InputStream]() {
       def mapRow(rs: ResultSet, rowNum: Int): InputStream = {
         rs.getBlob("IMAGE").getBinaryStream
       }
@@ -38,18 +39,33 @@ class PostRepository {
   }
 
   def getPostById(postId: Long): Post = {
-    val queryUser = new JdbcTemplate(dataSource)
+    val queryPost = new JdbcTemplate(dataSource)
     val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS WHERE ID=?"
-    val posts = queryUser.query(sql, postRowMapper, postId).asScala.toList
+    val posts = queryPost.query(sql, postRowMapper, postId).asScala.toList
     if (posts.isEmpty) null else posts.head
   }
 
   def getAll: List[Post] = {
-    val queryUser = new JdbcTemplate(dataSource)
+    val queryPost = new JdbcTemplate(dataSource)
     val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS"
-    queryUser.query(sql, postRowMapper).asScala.toList
+    queryPost.query(sql, postRowMapper).asScala.toList
   }
 
+  def deletePost(id: Long): Unit = {
+    val deletePost = new JdbcTemplate(dataSource)
+    val sql = "DELETE FROM MYSOCIALMEDIA.POSTS WHERE ID=?"
+    val comments = getAllCommentsFromPost(id)
+    comments.foreach( c => deleteComment(c.id))
+    deletePost.update(sql, id)
+  }
+
+  def deleteComment(id: Long): Unit = {
+    val deleteComment = new JdbcTemplate(dataSource)
+    val sqlMentionatedUsers = "DELETE FROM MYSOCIALMEDIA.COMMENTS_USERS WHERE COMMENT_ID=?"
+    val sqlComments = "DELETE FROM MYSOCIALMEDIA.COMMENTS WHERE ID=?"
+    deleteComment.update(sqlMentionatedUsers, id)
+    deleteComment.update(sqlComments, id)
+  }
 
   def getCommentsByPost(postId: Long): List[Comment] = {
     val query = new JdbcTemplate(dataSource)
@@ -57,11 +73,16 @@ class PostRepository {
     query.query(sql, commentRowMapper, postId).asScala.toList
   }
 
-  def getCommentById(id: Long) : Comment = {
+  def getUserMentionsByComment(commentId: Long): List[String] = {
     val query = new JdbcTemplate(dataSource)
-    val sql = "SELECT * FROM MYSOCIALMEDIA.COMMENTS WHERE ID=?"
-    val comments = query.query(sql, commentRowMapper, id).asScala.toList
-    if (comments.isEmpty) null else comments.head
+    val sql = "SELECT * FROM MYSOCIALMEDIA.COMMENTS_USERS WHERE COMMENT_ID=?"
+    query.query(sql, userMentionsRowMapper, commentId).asScala.toList
+  }
+
+  private def getAllCommentsFromPost(postId: Long): List[Comment] = {
+    val queryPost = new JdbcTemplate(dataSource)
+    val sql = "SELECT * FROM MYSOCIALMEDIA.COMMENTS WHERE POST_ID=?"
+    queryPost.query(sql, commentRowMapper,postId).asScala.toList
   }
 
   private def insertPost(post: Post): Long = {
@@ -92,19 +113,55 @@ class PostRepository {
     post.id
   }
 
+
   private def insertComment(post: Post, comment: Comment): Unit = {
     val insertComment = new NamedParameterJdbcTemplate(dataSource)
     val parameters = updateAndInsertCommentParameters(comment, post)
 
-    insertComment.update("INSERT INTO MYSOCIALMEDIA.COMMENTS(POST_ID,OWNER_UID,TEXT,INSTANT) VALUES(:post_id,:owner_uid,:text,:instant)", parameters)
+    val holder = new GeneratedKeyHolder
+
+    insertComment.update("INSERT INTO MYSOCIALMEDIA.COMMENTS(POST_ID,OWNER_UID,TEXT,INSTANT) VALUES(:post_id,:owner_uid,:text,:instant)", parameters, holder)
+
+    comment.id = holder.getKey.longValue()
+
+    comment.usersUidMentions.foreach(mention => {
+      insertUserMention(comment.id, mention)
+    })
   }
 
   private def updateComment(comment: Comment): Unit = {
     val updateComment = new NamedParameterJdbcTemplate(dataSource)
     val parameters = updateAndInsertCommentParameters(comment)
     parameters.addValue("id", comment.id)
+    parameters.addValue("text", comment.text)
+    parameters.addValue("instant", comment.instant)
 
     updateComment.update("UPDATE MYSOCIALMEDIA.COMMENTS SET TEXT=:text,INSTANT=:instant WHERE ID=:id", parameters)
+
+    deleteAllUserMentionsToComment(comment.id)
+    comment.usersUidMentions.foreach(mention => {
+      insertUserMention(comment.id, mention)
+    })
+  }
+
+  private def insertUserMention(commentId: Long, mentionedUser: String): Unit = {
+    val insertMention = new NamedParameterJdbcTemplate(dataSource)
+
+    val parameters = new MapSqlParameterSource()
+
+    parameters.addValue("user_uid", userRepository.getUserUidByUsername(mentionedUser))
+    parameters.addValue("comment_id", commentId)
+
+    insertMention.update("INSERT INTO MYSOCIALMEDIA.COMMENTS_USERS(USER_UID,COMMENT_ID) VALUES(:user_uid,:comment_id)", parameters)
+  }
+
+  def deleteAllUserMentionsToComment(commentId: Long) : Unit = {
+    val deleteMentions = new NamedParameterJdbcTemplate(dataSource)
+
+    val parameters = new MapSqlParameterSource()
+    parameters.addValue("comment_id", commentId)
+
+    deleteMentions.update("DELETE FROM MYSOCIALMEDIA.COMMENTS_USERS WHERE COMMENT_ID=:comment_id", parameters)
   }
 
   private def updateAndInsertPostParameters(post: Post): MapSqlParameterSource = {
@@ -151,13 +208,24 @@ class PostRepository {
 
   private def commentRowMapper: RowMapper[Comment] = {
     new RowMapper[Comment]() {
+
       def mapRow(rs: ResultSet, rowNum: Int): Comment = {
         new Comment(rs.getLong("ID"),
           rs.getString("TEXT"),
           rs.getString("OWNER_UID"),
-          rs.getTimestamp("INSTANT").toLocalDateTime
+          rs.getTimestamp("INSTANT").toLocalDateTime,
+          getUserMentionsByComment(rs.getLong("ID"))
         )
       }
     }
   }
+
+  private def userMentionsRowMapper: RowMapper[String] = {
+    new RowMapper[String]() {
+      def mapRow(rs: ResultSet, rowNum: Int): String = {
+        userRepository.getUsernameByUserUid(rs.getString("USER_UID"))
+      }
+    }
+  }
+
 }

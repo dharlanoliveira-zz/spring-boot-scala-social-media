@@ -1,12 +1,14 @@
 package dharlanoliveira.mysocialmedia.acceptance.cucumber.features
 
-import dharlanoliveira.mysocialmedia.application.domain.{Comment, Post}
-import dharlanoliveira.mysocialmedia.application.dto.{NewCommentDTO, UpdateCommentDTO}
+import dharlanoliveira.mysocialmedia.application.domain.Comment
+import dharlanoliveira.mysocialmedia.application.dto.{DeleteCommentDTO, NewCommentDTO, UpdateCommentDTO}
 import dharlanoliveira.mysocialmedia.repository.PostRepository
 import io.cucumber.java.en.{Given, Then, When}
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.http.{HttpEntity, HttpMethod}
 
 class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
 
@@ -70,6 +72,18 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
     this.response = restTemplate.postForObject(s"/posts/${dto.postId}/comments/${dto.id}", dto, classOf[String])
   }
 
+  @When("the user {string} delete this comment")
+  def deleteComment(username: String): Unit = {
+    val dto = new DeleteCommentDTO()
+    dto.id = this.referenceComment.id
+    dto.postId = this.postSteps.referencePost.id
+    dto.userUid = userSteps.users(username)
+
+    val request = new HttpEntity[DeleteCommentDTO](dto)
+    val responseEntity = restTemplate.exchange(s"/posts/${dto.id}/comments/${dto.id}", HttpMethod.DELETE, request, classOf[String])
+    this.response = responseEntity.getBody
+  }
+
   @Then("the system will inform that user is required in a comment")
   def userIsRequiredInAComment(): Unit = {
     assertThat(this.response).startsWith("User cannot be null")
@@ -110,6 +124,37 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
   @Then("the system will inform that only the owner can edit the comment")
   def onlyOwnerCanEditComments(): Unit = {
     assertThat(this.response).isEqualTo("Only same user can edit the comment")
+  }
+
+  @Then("will registered a mention to {string} in this comment")
+  def mentionRegistered(userUid: String): Unit = {
+    val postId = postSteps.referencePost.id
+    val post = postRepository.getPostById(postId)
+    assertNotNull(post)
+    assertThat(post.comments.length).isEqualTo(1)
+    assertThat(post.comments(0).usersUidMentions.find( uid => uid == userUid).size).isEqualTo(1)
+  }
+
+  @Then("there will be no mentions of users in this comment")
+  def noMentionsOfUsers(): Unit = {
+    val postId = postSteps.referencePost.id
+    val post = postRepository.getPostById(postId)
+    assertNotNull(post)
+    assertThat(post.comments.length).isEqualTo(1)
+    assertThat(post.comments(0).usersUidMentions.length).isEqualTo(0)
+  }
+
+  @Then("comment will be excluded")
+  def commentExcluded(): Unit = {
+    val postId = postSteps.referencePost.id
+    val post = postRepository.getPostById(postId)
+    assertNotNull(post)
+    assertThat(post.comments.length).isEqualTo(0)
+  }
+
+  @Then("the system will inform that only the owner can delete the comment")
+  def onlyOwnerCanDeleteComments(): Unit = {
+    assertThat(this.response).isEqualTo("Only same user can delete the comment")
   }
 
 }

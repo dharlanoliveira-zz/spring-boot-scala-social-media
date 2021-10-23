@@ -78,6 +78,14 @@ class Post() {
     findedComment.updateText(text)
   }
 
+  def deleteComment(id: Long, userUid: String) : Comment = {
+    val comment = this.comments.find(c => c.id == id).orNull
+    if(comment == null) throw new BusinessViolation(s"Comment doesn't exists")
+    if(comment.ownerUid != userUid) throw new BusinessViolation(s"Only same user can delete the comment")
+    this.comments = this.comments.filter(_ != comment)
+    comment
+  }
+
 
   def toMap: Map[String, _] = {
     Map(

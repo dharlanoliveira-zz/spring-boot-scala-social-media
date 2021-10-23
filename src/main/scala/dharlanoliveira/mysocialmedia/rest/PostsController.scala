@@ -1,16 +1,16 @@
 package dharlanoliveira.mysocialmedia.rest
 
-import dharlanoliveira.mysocialmedia.application.{PostApplicationService, UserApplicationService}
-import dharlanoliveira.mysocialmedia.application.dto.{IdDTO, NewCommentDTO, NewPostDTO, UpdateCommentDTO, UpdatePostDTO, UserIdDTO, UserRegistrationDTO}
+import dharlanoliveira.mysocialmedia.application.PostApplicationService
+import dharlanoliveira.mysocialmedia.application.dto._
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.{GetMapping, PatchMapping, PathVariable, PostMapping, RequestBody, ResponseStatus, RestController}
+import org.springframework.web.bind.annotation._
 import org.valid4j.Assertive.ensure
 
-import java.io.{ByteArrayInputStream, InputStream}
+import java.io.ByteArrayInputStream
 import java.net.URLConnection
-import java.util.{Base64, Optional}
+import java.util.Base64
 import javax.servlet.http.HttpServletResponse
 
 @RestController
@@ -75,6 +75,23 @@ class PostsController {
     ensure(comment.postId == postId)
     ensure(comment.id == commentId)
     applicationService.updateComment(comment)
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @DeleteMapping(path = Array("/posts/{postId}/comments/{commentId}"))
+  def deleteComment(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody deleteComment: DeleteCommentDTO): Unit = {
+    ensure(deleteComment != null)
+    ensure(deleteComment.id == commentId)
+    ensure(deleteComment.postId == postId)
+    applicationService.deleteComment(deleteComment)
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @DeleteMapping(path = Array("/posts/{postId}"))
+  def deletePost(@PathVariable postId: Long, @RequestBody deletePost: DeletePostDTO): Unit = {
+    ensure(deletePost != null)
+    ensure(deletePost.id == postId)
+    applicationService.deletePost(deletePost)
   }
 
   def extractImageContent(image: String): ByteArrayInputStream = {

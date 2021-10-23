@@ -2,6 +2,7 @@ package dharlanoliveira.mysocialmedia.repository
 
 import dharlanoliveira.mysocialmedia.application.domain.User
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.{JdbcTemplate, RowMapper, RowMapperResultSetExtractor}
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Component
@@ -62,6 +63,32 @@ class UserRepository {
         new User(rs.getString("UID").toCharArray,rs.getString("USERNAME"),rs.getString("MAIL"))
       }
     }).asScala.toList
+  }
+
+  def getUserUidByUsername(username: String): String = {
+    val queryUser = new JdbcTemplate(dataSource)
+    val sql = "SELECT UID FROM MYSOCIALMEDIA.USERS WHERE USERNAME=?"
+
+    val users = queryUser.query(sql, new RowMapper[String]() {
+      def mapRow(rs: ResultSet, rowNum: Int): String = {
+        rs.getString("UID")
+      }
+    }, username).asScala.toList
+
+    if(users.isEmpty) null else users.head
+  }
+
+  def getUsernameByUserUid(uid: String): String = {
+    val queryUser = new JdbcTemplate(dataSource)
+    val sql = "SELECT USERNAME FROM MYSOCIALMEDIA.USERS WHERE UID=?"
+
+    val users = queryUser.query(sql, new RowMapper[String]() {
+      def mapRow(rs: ResultSet, rowNum: Int): String = {
+        rs.getString("USERNAME")
+      }
+    }, uid).asScala.toList
+
+    if(users.isEmpty) null else users.head
   }
 
 }

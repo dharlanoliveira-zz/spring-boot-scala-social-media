@@ -24,13 +24,14 @@ class Comment() {
     this.usersUidMentions = extractMentions(text)
   }
 
-  def this(id: Long, text: String, ownerUid: String, instant: LocalDateTime) = {
+  def this(id: Long, text: String, ownerUid: String, instant: LocalDateTime, userUidMentions: List[String]) = {
     this()
 
     this.id = id
     this.ownerUid = ownerUid
     this.text = text
     this.instant = instant
+    this.usersUidMentions = userUidMentions
 
     checkInvariants()
   }
@@ -40,6 +41,8 @@ class Comment() {
     this.instant = LocalDateTime.now()
 
     checkInvariants()
+
+    this.usersUidMentions = extractMentions(text)
   }
 
   def checkInvariants(): Unit = {
