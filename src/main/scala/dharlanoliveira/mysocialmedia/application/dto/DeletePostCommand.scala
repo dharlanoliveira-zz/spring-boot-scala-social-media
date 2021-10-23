@@ -2,15 +2,12 @@ package dharlanoliveira.mysocialmedia.application.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-class UserRegistrationDTO {
+class DeletePostCommand {
 
   @JsonProperty
-  var username: String = _
+  var id: Long = _
 
   @JsonProperty
-  var email: String = _
-
-  @JsonProperty
-  var password: String = _
+  var userUid : String = _
 
 }

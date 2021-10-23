@@ -1,7 +1,7 @@
 package dharlanoliveira.mysocialmedia.acceptance.cucumber.features
 
 import dharlanoliveira.mysocialmedia.application.domain.Comment
-import dharlanoliveira.mysocialmedia.application.dto.{DeleteCommentDTO, NewCommentDTO, UpdateCommentDTO}
+import dharlanoliveira.mysocialmedia.application.dto.{DeleteCommentCommand, NewCommentDTO, UpdateCommentCommand}
 import dharlanoliveira.mysocialmedia.repository.PostRepository
 import io.cucumber.java.en.{Given, Then, When}
 import org.assertj.core.api.Assertions.assertThat
@@ -64,7 +64,7 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
 
   @When("the user {string} change the text of this comment to {string}")
   def userUpdateComment(username: String, text: String): Unit = {
-    val dto = new UpdateCommentDTO()
+    val dto = new UpdateCommentCommand()
     dto.id = this.referenceComment.id
     dto.userUid = userSteps.users(username)
     dto.postId = postSteps.referencePost.id
@@ -74,12 +74,12 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
 
   @When("the user {string} delete this comment")
   def deleteComment(username: String): Unit = {
-    val dto = new DeleteCommentDTO()
+    val dto = new DeleteCommentCommand()
     dto.id = this.referenceComment.id
     dto.postId = this.postSteps.referencePost.id
     dto.userUid = userSteps.users(username)
 
-    val request = new HttpEntity[DeleteCommentDTO](dto)
+    val request = new HttpEntity[DeleteCommentCommand](dto)
     val responseEntity = restTemplate.exchange(s"/posts/${dto.id}/comments/${dto.id}", HttpMethod.DELETE, request, classOf[String])
     this.response = responseEntity.getBody
   }

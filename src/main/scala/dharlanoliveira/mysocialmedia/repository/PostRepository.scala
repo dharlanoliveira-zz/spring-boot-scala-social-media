@@ -1,6 +1,8 @@
 package dharlanoliveira.mysocialmedia.repository
 
 import dharlanoliveira.mysocialmedia.application.domain.{Comment, Post}
+import dharlanoliveira.mysocialmedia.application.dto.Order
+import dharlanoliveira.mysocialmedia.application.dto.Order.OrderType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterJdbcTemplate}
 import org.springframework.jdbc.core.support.SqlLobValue
@@ -17,6 +19,8 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 @Component
 class PostRepository {
 
+
+
   @Autowired
   var dataSource: DataSource = _
 
@@ -25,6 +29,12 @@ class PostRepository {
 
   def save(post: Post): Long = {
     if (post.id == 0) insertPost(post) else updatePost(post)
+  }
+
+  def getPostsByUser(uid: String, order: OrderType) : List[Post] = {
+    val queryPost = new JdbcTemplate(dataSource)
+    val sql = s"SELECT * FROM MYSOCIALMEDIA.POSTS WHERE OWNER_UID=? ORDER BY INSTANT ${order.toString}"
+    queryPost.query(sql, postRowMapper, uid).asScala.toList
   }
 
   def getImageByPostId(id: Long): InputStream = {
@@ -45,9 +55,9 @@ class PostRepository {
     if (posts.isEmpty) null else posts.head
   }
 
-  def getAll: List[Post] = {
+  def getAll(order: OrderType = Order.DESC): List[Post] = {
     val queryPost = new JdbcTemplate(dataSource)
-    val sql = "SELECT * FROM MYSOCIALMEDIA.POSTS"
+    val sql = s"SELECT * FROM MYSOCIALMEDIA.POSTS ORDER BY INSTANT ${order.toString}"
     queryPost.query(sql, postRowMapper).asScala.toList
   }
 

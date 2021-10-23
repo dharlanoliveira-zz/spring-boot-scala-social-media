@@ -2,14 +2,15 @@ package dharlanoliveira.mysocialmedia.application.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-import java.time.LocalDateTime
-
-class CommentDTO {
+class UserRegistrationCommand {
 
   @JsonProperty
-  var text: String = _
+  var username: String = _
 
   @JsonProperty
-  var instant: LocalDateTime = _
+  var email: String = _
+
+  @JsonProperty
+  var password: String = _
 
 }

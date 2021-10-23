@@ -2,14 +2,15 @@ package dharlanoliveira.mysocialmedia.application.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-import java.time.LocalDateTime
-
-class CommentDTO {
+class DeleteCommentCommand {
 
   @JsonProperty
-  var text: String = _
+  var id: Long = _
 
   @JsonProperty
-  var instant: LocalDateTime = _
+  var postId: Long = _
+
+  @JsonProperty
+  var userUid : String = _
 
 }

@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream
 import java.net.URLConnection
 import java.util.Base64
 import javax.servlet.http.HttpServletResponse
+import scala.jdk.javaapi.CollectionConverters.asJava
 
 @RestController
 class PostsController {
@@ -21,6 +22,23 @@ class PostsController {
 
   val validImageContentTypes: Array[String] = Array("image/png","image/jpeg")
 
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping(path = Array("/posts"), params=Array("userUid"))
+  def getAllPostsOfUser(@RequestParam(value="userUid",required=true) userUid: String, @RequestParam(required=false) order: String): java.util.List[PostDTO] = {
+    val isOrderType = Order.isOrderType(order)
+    val orderSelected = if (isOrderType) Order.withName(order) else Order.DESC
+    ensure(userUid != null)
+    asJava(applicationService.getAllPostsOfUser(userUid, orderSelected))
+  }
+
+  @ResponseStatus(HttpStatus.OK)
+  @GetMapping(path = Array("/posts"))
+  def getAllPosts(@RequestParam(required=false) order: String): java.util.List[PostDTO] = {
+    val isOrderType = Order.isOrderType(order)
+    val orderSelected = if (isOrderType) Order.withName(order) else Order.DESC
+    asJava(applicationService.getAllPosts(orderSelected))
+  }
+
   /**
    * Register new user
    *
@@ -29,7 +47,7 @@ class PostsController {
    */
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping(path = Array("/posts"))
-  def newPost(@RequestBody post: NewPostDTO): IdDTO = {
+  def newPost(@RequestBody post: NewPostCommand): IdDTO = {
     ensure(post != null)
     val stream = extractImageContent(post.imageBase64)
     applicationService.newPost(post.userUid,post.text,stream)
@@ -37,7 +55,7 @@ class PostsController {
 
   @ResponseStatus(HttpStatus.OK)
   @PatchMapping(path = Array("/posts/{id}"))
-  def updatePost(@PathVariable id: Long, @RequestBody post: UpdatePostDTO): Unit = {
+  def updatePost(@PathVariable id: Long, @RequestBody post: UpdatePostCommand): Unit = {
     ensure(post != null)
     ensure(post.id == id, "URL and body post ID are differents")
     val stream = extractImageContent(post.imageBase64)
@@ -70,7 +88,7 @@ class PostsController {
 
   @ResponseStatus(HttpStatus.OK)
   @PostMapping(path = Array("/posts/{postId}/comments/{commentId}"))
-  def update(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody comment: UpdateCommentDTO): Unit = {
+  def update(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody comment: UpdateCommentCommand): Unit = {
     ensure(comment != null)
     ensure(comment.postId == postId)
     ensure(comment.id == commentId)
@@ -79,7 +97,7 @@ class PostsController {
 
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping(path = Array("/posts/{postId}/comments/{commentId}"))
-  def deleteComment(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody deleteComment: DeleteCommentDTO): Unit = {
+  def deleteComment(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody deleteComment: DeleteCommentCommand): Unit = {
     ensure(deleteComment != null)
     ensure(deleteComment.id == commentId)
     ensure(deleteComment.postId == postId)
@@ -88,7 +106,7 @@ class PostsController {
 
   @ResponseStatus(HttpStatus.OK)
   @DeleteMapping(path = Array("/posts/{postId}"))
-  def deletePost(@PathVariable postId: Long, @RequestBody deletePost: DeletePostDTO): Unit = {
+  def deletePost(@PathVariable postId: Long, @RequestBody deletePost: DeletePostCommand): Unit = {
     ensure(deletePost != null)
     ensure(deletePost.id == postId)
     applicationService.deletePost(deletePost)

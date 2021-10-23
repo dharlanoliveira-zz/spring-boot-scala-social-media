@@ -4,7 +4,7 @@ import dharlanoliveira.mysocialmedia.application.domain.User
 import io.cucumber.java.en.{Given, Then, When}
 import org.assertj.core.api.Assertions.assertThat
 import org.springframework.boot.test.web.client.TestRestTemplate
-import dharlanoliveira.mysocialmedia.application.dto.UserRegistrationDTO
+import dharlanoliveira.mysocialmedia.application.dto.UserRegistrationCommand
 import dharlanoliveira.mysocialmedia.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -16,7 +16,7 @@ class UserSteps {
   @Autowired
   var userRepository: UserRepository = _
 
-  var dto: UserRegistrationDTO = _
+  var dto: UserRegistrationCommand = _
 
   var response : String = _
 
@@ -50,7 +50,7 @@ class UserSteps {
 
   @When("I register a user with username {string} and email {string} and password {string}")
   def userWithUsernameAndMail(username: String, email: String, password: String): Unit = {
-    dto = new UserRegistrationDTO()
+    dto = new UserRegistrationCommand()
     dto.username = username
     dto.email = email
     dto.password = password
@@ -60,7 +60,7 @@ class UserSteps {
 
   @When("I register a new user with username {string}")
   def userWithUsername(username: String): Unit = {
-    dto = new UserRegistrationDTO()
+    dto = new UserRegistrationCommand()
     dto.username = username
     dto.email = "anymail@google.com"
     dto.password = "password"
@@ -70,7 +70,7 @@ class UserSteps {
 
   @When("I register a new user with email {string}")
   def userWithEmail(email: String): Unit = {
-    dto = new UserRegistrationDTO()
+    dto = new UserRegistrationCommand()
     dto.username = "ykz"
     dto.email = email
     dto.password = "password"
@@ -80,7 +80,7 @@ class UserSteps {
 
   @When("I register a user without username")
   def userWithoutUsername(): Unit = {
-    dto = new UserRegistrationDTO()
+    dto = new UserRegistrationCommand()
     dto.username = null
     dto.email = "yzk@domain.com"
     dto.password = "password"
@@ -90,7 +90,7 @@ class UserSteps {
 
   @When("I register a user without email")
   def userWithoutEmail(): Unit = {
-    dto = new UserRegistrationDTO()
+    dto = new UserRegistrationCommand()
     dto.username = "out"
     dto.email = null
     dto.password = "password"
@@ -100,7 +100,7 @@ class UserSteps {
 
   @When("I register a user without password")
   def userWithoutPassword(): Unit = {
-    dto = new UserRegistrationDTO()
+    dto = new UserRegistrationCommand()
     dto.username = "dhtcu"
     dto.email = "yzk@domain.com"
     dto.password = null

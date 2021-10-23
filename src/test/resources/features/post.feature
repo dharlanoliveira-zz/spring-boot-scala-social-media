@@ -45,3 +45,30 @@ Feature: Creating and Updating Posts
     And there is a post with text "My first post" from this user
     When the user "dharlanoliveira" delete this post
     Then the post will be deleted
+
+  Scenario: Listing users posts
+    Given exists a user with username "dharlanoliveira"
+    And exists a user with username "andrefernandez"
+    And there is a post with text "Post 1" from the user "dharlanoliveira" created in "2030-01-01"
+    And there is a post with text "Post 2" from the user "dharlanoliveira" created in "2031-02-02"
+    When the user "dharlanoliveira" requests their posts
+    Then the system will return "Post 2" and "Post 1" in this order
+
+
+  Scenario: Listing users posts
+    Given exists a user with username "dharlanoliveira"
+    And exists a user with username "andrefernandez"
+    And there is a post with text "Post 1" from the user "dharlanoliveira" created in "2030-01-01"
+    And there is a post with text "Post 2" from the user "dharlanoliveira" created in "2031-02-02"
+    When the user "dharlanoliveira" requests their posts in ascending order
+    Then the system will return "Post 1" and "Post 2" in this order
+
+
+  Scenario: Listing users posts
+    Given exists a user with username "dharlanoliveira"
+    And exists a user with username "andrefernandez"
+    And there is a post with text "Post 1" from the user "dharlanoliveira" created in "2030-01-01"
+    And there is a post with text "Post 2" from the user "dharlanoliveira" created in "2031-02-02"
+    And there is a post with text "Post 3" from the user "andrefernandez" created in "2032-02-02"
+    When the user "dharlanoliveira" requests all posts
+    Then the system will return "Post 3", "Post 2" and "Post 1" in this order
