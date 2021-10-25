@@ -1,16 +1,16 @@
-#My social media application
+# My social media application
 
 A backend application created to demonstrate the creation of a spring boot microservice using scala.
 
-###Context:
+### Context:
 
 I have a lot of experience with spring boot, but using kotlin. My experience with scala is 
 in the context of Apache Spark. I need to "learn" how to create microservices using spring boot 
 and scala. It wasn't so difficult to learn, because it's very similar to kotlin-way.
 
-##Chooses:
+## Chooses:
 
-###1) Gradle
+### 1) Gradle
 
 I have been using gradle on last 4 years, so it's my natural choice. I particularly
 believe that it fits very well with spring-boot. It's able to lead all build process,
@@ -18,18 +18,18 @@ including the docker image generation and publishing. The project is packaged wi
 gradle wrapper, so it's easier to run the build process without the necessity
 to install gradle outside the project. I
 
-###2) JDK 16
+### 2) JDK 16
 
 It's the JDK version that I chose to develop the app locally. For the packaged app in docker I use JRE 11 (best version available in paketo).
 
-###3) Spring boot
+### 3) Spring boot
 
 I am fascinated about the facilities that spring boot brings to your life. In my opinion,
 it's a natural choice when you are talking about JVM applications. It integrates
 with all major frameworks, and you can use it easily, bacause auto-configuration 
 feature.
 
-###4) Rest level 2 (Richardson Maturity Model)
+### 4) Rest level 2 (Richardson Maturity Model)
 
 I have been working with REST on the last 10 years, at least. I tried to use REST by the bookmark
 a lot of times, and I have had some bad experience with granular REST endpoints. Rest level 2 fits well when you are 
@@ -42,7 +42,7 @@ command and quey separation. This style works to complex and simple scenarios.
 However, in current project, I preffered to use REST level 2. For educational purposes and to expose low granular funcionaties,
 how is the case, REST level 2 is my preffered choice.
 
-###5) Cucumber
+### 5) Cucumber
 
 BDD, that I like to call [specification by example](https://www.amazon.com.br/Specification-Example-Successful-Deliver-Software/dp/1617290084),
 for me, it's something crutial for a project success. It's the most important type of test of a backend application, that gives to you
@@ -70,7 +70,7 @@ there was a very specific functionality provided by the class.
 I configured jacoco in gradle to collect coverage metrics, and I have had a result of 80%. I think there is some more features to coverage,
 but there is a schedule that I need to follow. However, 80% it's a good number.
 
-###6) JDBC
+### 6) JDBC
 
 Aiming for simplification, I chose not to use JPA (Hibernate). I used pure JDBC (using spring). This approach has advantages and disadvantages,
 but considering NoSQL databases, and pure Domain Driven Design, JPA it's not the silver bullet anymore. Not to use JPA is a plausible option.
@@ -81,7 +81,7 @@ a "JPA" option.
 
 However, it's need to be clear, I need to write a lot of code that I am not used to when I'm using JPA. 
 
-###7) User UID
+### 7) User UID
 
 Aiming for simplification, I chose not to implement any security feature. It would be very onerous. So when you registir a new user, it's generated
 a UID, using username, mail and password. This UID is the paremeter used in the other endpoints to say what user we are dealing to. The correct way 
@@ -89,34 +89,34 @@ would se something similiar to a token jwt, that would be used to identify the u
 
 The option for use the UID was to avoid sending clear username in the body. 
 
-###7) Image processing
+### 8) Image processing
 
 I chose just to rescale the image and downsize the image quality as way of reach the requirements. Again, aiming for simplification, when I am
 rescaling the image, I fixed the with in 128px. There wasn't enhough time to create an asynchronous queue to deal with image processing.
 For a real production application, It is something necessary.
 
-###8) Clean code
+### 9) Clean code
 
 I really beliave in clean code as an art. It's a skill that you need to develop to create susteinable code. When you reach this level, 
 commenting code it's not so necessary, at least in parts not so critical. Because of that, I prefered to keep the code clean without
 comment methods or endpoints. I hope that my code is really clear :grin:.
 
-###9) Mention notification
+### 10) Mention notification
 
 I haven't had enough time to create a notification module for users, but I prrsisted this in information in database. It's easier 
 to extend the app to do it.
 
-###9) Blob field
+### 11) Blob field
 
 I chose to store the image content in the mysql database. I don't think that SQL databases are the best option to store images, I would prefer to
 store the images in a filesystem service, for example, but to conclude this challenge I need to cut some desirable requirements.
 
-###10) Paketo
+### 12) Paketo
 
 I configured my gradle file to use packeto to build and publish my backend image. This possibility cames easily with the use of gradle and spring boot, you need 
 just some lines of configuration. Because of that my project don't have a Dockerfile. However, the docker compose file is necessary to publish the app in AWS (and to run the packaged app locally).
 
-###10) AWS
+### 13) AWS
 
 All my experience with clouds are with an on-premise enviroments. For example, here in my current job, we use rancher as a k8s enviroment and our
 continuous deployment enviroment is based on jenkins (self-hosted). So, it was a challenge to publish my app in AWS, but I dit it. I used 
@@ -126,21 +126,21 @@ This feature made my day easier.
 
 ## Commands
 
-###1) Run tests
+### 1) Run tests
 
 **./gradlew test**
 
-###2) Build project
+### 2) Build project
 
 **./gradlew clean build**
 
-###3) Generate image
+### 3) Generate image
 
 **./gradlew clean test bootBuildImage**
 
 I commented my password to dockerhub in the build.gradle file. Without that it isn't able to publish. 
 
-###4) Create services in AWS
+### 4) Create services in AWS
 
 You need to have AWS cli installed and configured. So it's just run the commands:
 
@@ -163,7 +163,7 @@ be able to see the effects on the database after REST operations (server: mysql,
 There is a file **Insominia.json** in the root directory. This file should be imported in insomnia and it will have
 the basic endpoints configured. This can facilitate the interaction with the service.
 
-####Register new user
+#### Register new user
 ```
 POST ${URL}/user/registration
 
@@ -178,7 +178,7 @@ Response:
 {"uid":"ae33514d53965403262104c7f1137106"}
 ```
 
-####Create new post
+#### Create new post
 
 ```
 POST ${URL}/posts
@@ -196,7 +196,7 @@ Response:
 }
 ```
 
-####Update post
+#### Update post
 
 ```
 PATCH ${URL}/posts/1
@@ -209,7 +209,7 @@ Request:
 }
 ```
 
-####Create new comment
+#### Create new comment
 
 ```
 POST ${URL}/posts/1/comments
@@ -223,7 +223,7 @@ Request:
 
 ```
 
-####Update comment
+#### Update comment
 ```
 PATCH ${URL}/posts/1/comments/1
 {
@@ -233,7 +233,7 @@ PATCH ${URL}/posts/1/comments/1
 }
 ```
 
-####List all users posts
+#### List all users posts
 
 ```
 POST ${URL}/posts
@@ -251,7 +251,7 @@ Response:
 
 ```
 
-####List posts from user
+#### List posts from user
 
 ```
 POST ${URL}/posts?userUid=ae33514d53965403262104c7f1137106
@@ -269,7 +269,7 @@ Response:
 
 ```
 
-####List posts from user with ordering
+#### List posts from user with ordering
 
 ```
 POST ${URL}/posts?userUid=ae33514d53965403262104c7f1137106&order=ASC
@@ -287,7 +287,7 @@ Response:
 
 ```
 
-####Get post image
+#### Get post image
 
 ```
 GET ${URL}/posts/1/image
@@ -297,7 +297,7 @@ Image
 
 ```
 
-####Delete post
+#### Delete post
 
 ```
 DELETE ${URL}/posts/1/image
@@ -308,7 +308,7 @@ DELETE ${URL}/posts/1/image
 }
 ```
 
-####Delete comment
+#### Delete comment
 
 ```
 DELETE ${URL}/posts/1/image
