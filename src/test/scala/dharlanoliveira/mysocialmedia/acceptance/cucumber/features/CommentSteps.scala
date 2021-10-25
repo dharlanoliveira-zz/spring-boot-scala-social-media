@@ -69,7 +69,7 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
     dto.userUid = userSteps.users(username)
     dto.postId = postSteps.referencePost.id
     dto.text = text
-    this.response = restTemplate.postForObject(s"/posts/${dto.postId}/comments/${dto.id}", dto, classOf[String])
+    this.response = restTemplate.patchForObject(s"/posts/${dto.postId}/comments/${dto.id}", dto, classOf[String])
   }
 
   @When("the user {string} delete this comment")
@@ -80,7 +80,7 @@ class CommentSteps(userSteps: UserSteps, postSteps: PostSteps) {
     dto.userUid = userSteps.users(username)
 
     val request = new HttpEntity[DeleteCommentCommand](dto)
-    val responseEntity = restTemplate.exchange(s"/posts/${dto.id}/comments/${dto.id}", HttpMethod.DELETE, request, classOf[String])
+    val responseEntity = restTemplate.exchange(s"/posts/${dto.postId}/comments/${dto.id}", HttpMethod.DELETE, request, classOf[String])
     this.response = responseEntity.getBody
   }
 

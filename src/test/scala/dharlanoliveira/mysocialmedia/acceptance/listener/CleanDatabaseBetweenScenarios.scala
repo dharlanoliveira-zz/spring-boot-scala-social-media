@@ -6,10 +6,6 @@ import javax.sql.DataSource
 
 class CleanDatabaseBetweenScenarios extends TestExecutionListener {
 
-//  override def beforeTestClass(testContext: TestContext): Unit = {
-//    clearDatabase(testContext)
-//  }
-
   override def beforeTestMethod(testContext: TestContext): Unit = {
     clearDatabase(testContext)
   }

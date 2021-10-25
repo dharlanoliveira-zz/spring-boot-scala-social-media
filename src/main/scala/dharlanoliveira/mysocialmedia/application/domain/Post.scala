@@ -86,15 +86,4 @@ class Post() {
     comment
   }
 
-
-  def toMap: Map[String, _] = {
-    Map(
-      "owner_uid" -> this.ownerUid,
-      "text" -> this.text,
-      "instant" -> Timestamp.valueOf(this.instant),
-      "image" -> this.image
-    )
-  }
-
-
 }

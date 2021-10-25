@@ -1,0 +1,33 @@
+version: "3.9"
+
+x-aws-vpc: "vpc-03825fc80d8c4bb3e"
+
+services:
+
+  mysql:
+    image: mysql:8.0.26
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - mysql
+    ports:
+      - '8080:8080'
+
+  web:
+    image: "dharlanh/spring-boot-scala-social-media"
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+    ports:
+      - "8090:8090"

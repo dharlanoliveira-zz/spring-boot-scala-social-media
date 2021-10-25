@@ -3,9 +3,6 @@ package dharlanoliveira.mysocialmedia.application.domain
 import dharlanoliveira.mysocialmedia.application.BusinessViolation
 import dharlanoliveira.mysocialmedia.application.util.Util.md5
 
-/*
- * Class user that guarantees the consistency of the state checking invariants in constructor
- */
 class User() {
   var uid: String = _
   var username: String = _
@@ -46,14 +43,6 @@ class User() {
     } else if (this.uid == null) {
       throw new BusinessViolation("UID cannot be null")
     }
-  }
-
-  def toMap: Map[String, _] = {
-    Map(
-      "uid" -> this.uid,
-      "username" -> this.username,
-      "mail" -> this.email
-    )
   }
 
 

@@ -2,12 +2,12 @@ package dharlanoliveira.mysocialmedia.repository
 
 import dharlanoliveira.mysocialmedia.application.domain.User
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
-import org.springframework.jdbc.core.{JdbcTemplate, RowMapper, RowMapperResultSetExtractor}
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert
+import org.springframework.jdbc.core.namedparam.{MapSqlParameterSource, NamedParameterJdbcTemplate}
+import org.springframework.jdbc.core.{JdbcTemplate, RowMapper}
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Component
 
-import java.sql.ResultSet
+import java.sql.{ResultSet, Types}
 import javax.sql.DataSource
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.jdk.javaapi.CollectionConverters.asJava
@@ -19,12 +19,15 @@ class UserRepository {
   var dataSource: DataSource = _
 
   def save(user: User): String = {
-    val parameters = user.toMap
-    val insertUser = new SimpleJdbcInsert(dataSource)
-              .withSchemaName("MYSOCIALMEDIA")
-              .withTableName("USERS")
+    val insertUser = new NamedParameterJdbcTemplate(dataSource)
 
-    insertUser.execute(asJava(parameters))
+    val parameters = new MapSqlParameterSource
+    parameters.addValue("uid", user.uid)
+    parameters.addValue("username", user.username)
+    parameters.addValue("mail", user.email)
+
+    insertUser.update("INSERT INTO MYSOCIALMEDIA.USERS(UID,USERNAME,MAIL) VALUES(:uid,:username,:mail)", parameters)
+
     user.uid
   }
 

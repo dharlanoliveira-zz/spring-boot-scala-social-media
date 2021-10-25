@@ -133,11 +133,9 @@ class PostRepository {
     insertComment.update("INSERT INTO MYSOCIALMEDIA.COMMENTS(POST_ID,OWNER_UID,TEXT,INSTANT) VALUES(:post_id,:owner_uid,:text,:instant)", parameters, holder)
 
     comment.id = holder.getKey.longValue()
-
-    comment.usersUidMentions.foreach(mention => {
-      insertUserMention(comment.id, mention)
-    })
+    insertUsersMentions(comment)
   }
+
 
   private def updateComment(comment: Comment): Unit = {
     val updateComment = new NamedParameterJdbcTemplate(dataSource)
@@ -149,9 +147,7 @@ class PostRepository {
     updateComment.update("UPDATE MYSOCIALMEDIA.COMMENTS SET TEXT=:text,INSTANT=:instant WHERE ID=:id", parameters)
 
     deleteAllUserMentionsToComment(comment.id)
-    comment.usersUidMentions.foreach(mention => {
-      insertUserMention(comment.id, mention)
-    })
+    insertUsersMentions(comment)
   }
 
   private def insertUserMention(commentId: Long, mentionedUser: String): Unit = {
@@ -236,6 +232,14 @@ class PostRepository {
         userRepository.getUsernameByUserUid(rs.getString("USER_UID"))
       }
     }
+  }
+
+  private def insertUsersMentions(comment: Comment): Unit = {
+    comment.usersUidMentions.foreach(mention => {
+      if (userRepository.existsUserWithUsername(mention)) {
+        insertUserMention(comment.id, mention)
+      }
+    })
   }
 
 }

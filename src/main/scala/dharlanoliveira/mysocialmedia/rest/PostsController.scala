@@ -39,12 +39,6 @@ class PostsController {
     asJava(applicationService.getAllPosts(orderSelected))
   }
 
-  /**
-   * Register new user
-   *
-   * @param post Information - mail and username - about new user
-   * @return User id
-   */
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping(path = Array("/posts"))
   def newPost(@RequestBody post: NewPostCommand): IdDTO = {
@@ -87,7 +81,7 @@ class PostsController {
   }
 
   @ResponseStatus(HttpStatus.OK)
-  @PostMapping(path = Array("/posts/{postId}/comments/{commentId}"))
+  @PatchMapping(path = Array("/posts/{postId}/comments/{commentId}"))
   def update(@PathVariable postId: Long,@PathVariable commentId: Long, @RequestBody comment: UpdateCommentCommand): Unit = {
     ensure(comment != null)
     ensure(comment.postId == postId)
