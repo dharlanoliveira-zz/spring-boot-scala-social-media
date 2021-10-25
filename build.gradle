@@ -33,7 +33,7 @@ bootBuildImage {
 	docker {
 		publishRegistry {
 			username = "dharlanh"
-			password = "W92dAJe*At"
+			password = "XXXXX"
 		}
 	}
 }

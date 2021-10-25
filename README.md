@@ -4,8 +4,8 @@ A backend application created to demonstrate the creation of a spring boot micro
 
 ### Context:
 
-I have a lot of experience with spring boot, but using kotlin. My experience with scala is 
-in the context of Apache Spark. I need to "learn" how to create microservices using spring boot 
+I have a lot of experience with spring boot, but using kotlin. My experience with scala was 
+in the context of Apache Spark. I needed to "learn" how to create microservices using spring boot 
 and scala. It wasn't so difficult to learn, because it's very similar to kotlin-way.
 
 ## Chooses:
@@ -14,9 +14,9 @@ and scala. It wasn't so difficult to learn, because it's very similar to kotlin-
 
 I have been using gradle on last 4 years, so it's my natural choice. I particularly
 believe that it fits very well with spring-boot. It's able to lead all build process,
-including the docker image generation and publishing. The project is packaged with the
+including the docker image generation and publishing. The project includes the
 gradle wrapper, so it's easier to run the build process without the necessity
-to install gradle outside the project. I
+to install gradle outside the project. 
 
 ### 2) JDK 16
 
@@ -26,31 +26,37 @@ It's the JDK version that I chose to develop the app locally. For the packaged a
 
 I am fascinated about the facilities that spring boot brings to your life. In my opinion,
 it's a natural choice when you are talking about JVM applications. It integrates
-with all major frameworks, and you can use it easily, bacause auto-configuration 
+with all major frameworks, and you can use it easily, because of auto-configuration 
 feature.
 
-### 4) Rest level 2 (Richardson Maturity Model)
+### 4) Flyway
 
-I have been working with REST on the last 10 years, at least. I tried to use REST by the bookmark
-a lot of times, and I have had some bad experience with granular REST endpoints. Rest level 2 fits well when you are 
+I used flyway to create database tables. It is used in H2 and MySQL. Tools like Flyway are vital to assure the creation of 
+an application professionally. This tool can guarantee that the code and database are sync. Only with this its is possible to 
+reach continuous delivery. 
+
+### 5) Rest level 2 (Richardson Maturity Model)
+
+I have been working with REST on the last 10 years, at least. I tried to use REST by the book
+a lot of times and I have had some bad experience with low-granularity REST endpoints. Rest level 2 fits well when you are 
 talking about APIs that are providing resouces in a low level. When you are talking abou complex applications, that exposes 
 services that are involved in a complex enviroment, the REST level 3 fits better.
 Currently, I prefer to use REST level 3 in almost every case. Moreover, I like to use 
 [Rest Without PUT](https://www.thoughtworks.com/radar/techniques/rest-without-put), using just GET and POST http methods and
-command and quey separation. This style works to complex and simple scenarios. 
+command and query separation. This style works to complex and simple scenarios. 
 
 However, in current project, I preffered to use REST level 2. For educational purposes and to expose low granular funcionaties,
 how is the case, REST level 2 is my preffered choice.
 
-### 5) Cucumber
+### 6) Cucumber
 
 BDD, that I like to call [specification by example](https://www.amazon.com.br/Specification-Example-Successful-Deliver-Software/dp/1617290084),
 for me, it's something crutial for a project success. It's the most important type of test of a backend application, that gives to you
-feedback about the funcionaties of your application thus about how well written your code are. I experienced in one project the practice of 100% unit testing
-and, besides of the benefits, it's not something that I would do without a very good reason. Considering the costs and the benefits of, actually I beliave the
-best model of testing is the [trophy model](https://pbs.twimg.com/media/DVUoM94VQAAzuws.jpg).
+feedback about the funcionaties of your application thus about how well written your code are. For me, they are more importants than unit tests. 
+I have experienced in one project the practice of 100% unit testing and, even having benefits, it's not something that I would do without a very good reason. 
+Considering the costs and the benefits of, actually I beliave the best model of testing is the [trophy model](https://pbs.twimg.com/media/DVUoM94VQAAzuws.jpg).
 
-I consider specification by example a kind of integration test, that give the test benefits of you app, but offer other amazing benefit: document the
+I consider specification by example (BDD) a kind of integration test, that give the test benefits of you app, but offer other amazing benefit: document the
 requirements of your app basing in examples.
 
 I have experience using cucumber and concordion to this kind of test, but recently I have been using cucumber. It has a very good integration with 
@@ -60,7 +66,7 @@ I have chosen to use an in memory database (h2) to the acceptance tests and when
 or in AWS.
 
 Considering the best practices about testing, you should always start your test with an "empty" state. So I created a class CleanDatabaseBetweenScenarios
-with the purpose to clean all database between a scenario and other. Therefore, you always need to configure the "Given state" of your test.
+with the purpose to clean all database between a scenario and other. Therefore, you always need to configure the "Given state" of your test before the "When" section.
 
 The cucumber features are in the folder src/test/resources. There are three features there: post, comment and user. 
 
@@ -70,46 +76,46 @@ there was a very specific functionality provided by the class.
 I configured jacoco in gradle to collect coverage metrics, and I have had a result of 80%. I think there is some more features to coverage,
 but there is a schedule that I need to follow. However, 80% it's a good number.
 
-### 6) JDBC
+### 7) JDBC
 
 Aiming for simplification, I chose not to use JPA (Hibernate). I used pure JDBC (using spring). This approach has advantages and disadvantages,
 but considering NoSQL databases, and pure Domain Driven Design, JPA it's not the silver bullet anymore. Not to use JPA is a plausible option.
 
 The use of JDBC facilitates the use of pure DDD, because you don't need to carry about to fit in a JPA entity in a domain model. Besides that,
-It's very commom to use other types of database. I, for example, have been using Elastic and ArangoDB a lot and in this cases there isn't 
+it's very commom to use other types of database NoSQL. I, for example, have been using Elastic and ArangoDB a lot and in this cases there isn't 
 a "JPA" option. 
 
-However, it's need to be clear, I need to write a lot of code that I am not used to when I'm using JPA. 
+However, it's need to be clear, I needed to write a lot of code that I am not used to when I'm using JPA. 
 
-### 7) User UID
+### 8) User UID
 
-Aiming for simplification, I chose not to implement any security feature. It would be very onerous. So when you registir a new user, it's generated
-a UID, using username, mail and password. This UID is the paremeter used in the other endpoints to say what user we are dealing to. The correct way 
-would se something similiar to a token jwt, that would be used to identify the user securily. 
+Aiming for simplification, I chose not to implement any security feature. It would be very onerous. So when you registir a new user, the system generates
+a UID, based on: username, mail and password. This UID is the paremeter used in the other endpoints to say what user we are dealing to.
+A more appropriate approach, if you have more time, would be to use jwt tokens to identify users.
 
-The option for use the UID was to avoid sending clear username in the body. 
+The option for use of the UID was to avoid sending clear username in the body of the requests. 
 
-### 8) Image processing
+### 9) Image processing
 
 I chose just to rescale the image and downsize the image quality as way of reach the requirements. Again, aiming for simplification, when I am
-rescaling the image, I fixed the with in 128px. There wasn't enhough time to create an asynchronous queue to deal with image processing.
+rescaling the image, I fixed the size of the image in 128px. There wasn't enhough time to create an asynchronous queue to deal with image processing.
 For a real production application, It is something necessary.
 
-### 9) Clean code
+### 10) Clean code
 
 I really beliave in clean code as an art. It's a skill that you need to develop to create susteinable code. When you reach this level, 
 commenting code it's not so necessary, at least in parts not so critical. Because of that, I prefered to keep the code clean without
-comment methods or endpoints. I hope that my code is really clear :grin:.
+comment methods or endpoints. I hope that my code is really clear.
 
-### 10) Mention notification
+### 11) Notification of mentioning in posts
 
-I haven't had enough time to create a notification module for users, but I prrsisted this in information in database. It's easier 
+I haven't had enough time to create a notification module for users mentioned in posts, but I persisted this in information in database. Now it's easier 
 to extend the app to do it.
 
-### 11) Blob field
+### 12) Blob field
 
 I chose to store the image content in the mysql database. I don't think that SQL databases are the best option to store images, I would prefer to
-store the images in a filesystem service, for example, but to conclude this challenge I need to cut some desirable requirements.
+store the images in a filesystem service, for example, but to conclude this challenge I need to cut some requirements.
 
 ### 12) Paketo
 
